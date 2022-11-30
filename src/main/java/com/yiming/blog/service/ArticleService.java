@@ -2,6 +2,7 @@ package com.yiming.blog.service;
 
 import com.yiming.blog.dao.dos.Archives;
 import com.yiming.blog.vo.ArticleVo;
+import com.yiming.blog.vo.Result;
 import com.yiming.blog.vo.params.PageParams;
 
 import java.util.List;
@@ -25,5 +26,16 @@ public interface ArticleService {
      */
     List<ArticleVo> listNewArticles();
 
+    /**
+     * 文章归档
+     * @return
+     */
     List<Archives> listArchives();
+
+    /**
+     * 查看文章详情
+     * @param articleId
+     * @return
+     */
+    Result findArticleById(Long articleId);
 }

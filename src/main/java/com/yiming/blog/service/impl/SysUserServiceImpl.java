@@ -4,11 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yiming.blog.dao.mapper.SysUserMapper;
 import com.yiming.blog.dao.pojo.SysUser;
+import com.yiming.blog.service.LoginService;
 import com.yiming.blog.service.SysUserService;
 import com.yiming.blog.utils.JWTUtils;
 import com.yiming.blog.vo.ErrorCode;
 import com.yiming.blog.vo.LoginUserVo;
 import com.yiming.blog.vo.Result;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ public class SysUserServiceImpl implements SysUserService {
     private SysUserMapper sysUserMapper;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private LoginService loginService;
     @Override
     public SysUser findUserById(Long id) {
         SysUser sysUser = sysUserMapper.selectById(id);
@@ -40,12 +44,14 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Override
     public Result getUserInfoByToken(String token) {
-        Map<String, Object> tokenBody = JWTUtils.checkToken(token);
-        if (tokenBody == null) {
-            return Result.fail(ErrorCode.NO_LOGIN.getCode(), ErrorCode.NO_LOGIN.getMsg());
+        //1.token合法性检查
+        //2.看redis是否能成功解析
+        SysUser user = loginService.checkToken(token);
+        if(user==null){
+            return Result.fail(ErrorCode.TOKEN_ILLEGAL.getCode(),ErrorCode.TOKEN_ILLEGAL.getMsg());
         }
-        String userJson = stringRedisTemplate.opsForValue().get("TOKEN_" + token);
-        SysUser user = JSON.parseObject(userJson, SysUser.class);
+
+
         LoginUserVo loginUserVo = new LoginUserVo();
         loginUserVo.setAccount(user.getAccount());
         loginUserVo.setAvatar(user.getAvatar());
@@ -56,5 +62,18 @@ public class SysUserServiceImpl implements SysUserService {
         return Result.success(loginUserVo);
 
 
+    }
+
+    @Override
+    public SysUser findUserByAccount(String account) {
+        LambdaQueryWrapper<SysUser> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(SysUser::getAccount,account);
+        lambdaQueryWrapper.last("limit 1");
+        return sysUserMapper.selectOne(lambdaQueryWrapper);
+    }
+
+    @Override
+    public void save(SysUser user) {
+        sysUserMapper.insert(user);
     }
 }

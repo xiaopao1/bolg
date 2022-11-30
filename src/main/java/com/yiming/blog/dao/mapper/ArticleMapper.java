@@ -8,7 +8,7 @@ import org.mybatis.spring.annotation.MapperScan;
 
 import java.util.List;
 
-@Mapper
+
 public interface ArticleMapper extends BaseMapper<Article> {
     List<Archives> listArchives();
 }
