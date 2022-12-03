@@ -11,8 +11,9 @@ import org.springframework.web.bind.annotation.*;
 public class LoginController {
     @Autowired
     private LoginService loginService;
+
     @PostMapping
-    public Result login(@RequestBody LoginParams loginParams){
+    public Result login(@RequestBody LoginParams loginParams) {
         return loginService.login(loginParams);
     }
 }

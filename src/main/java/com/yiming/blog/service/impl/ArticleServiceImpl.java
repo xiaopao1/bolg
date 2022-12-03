@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Service
 public class ArticleServiceImpl implements ArticleService {
     @Autowired
@@ -30,10 +31,10 @@ public class ArticleServiceImpl implements ArticleService {
 
     private ArticleVo copy(Article article, boolean isAuthor, boolean isBody, boolean isTags) {
         ArticleVo articleVo = new ArticleVo();
-        BeanUtils.copyProperties(article,articleVo);
+        BeanUtils.copyProperties(article, articleVo);
         articleVo.setCreateDate(new DateTime(article.getCreateDate()).toString("yyyy-MM-dd:HH:mm"));
         //并不是所有的接口，都需要标签，作者信息
-        if(isAuthor){
+        if (isAuthor) {
             Long authorId = article.getAuthorId();
             SysUser sysuser = sysUserService.findUserById(authorId);
             if (sysuser == null) {
@@ -42,10 +43,10 @@ public class ArticleServiceImpl implements ArticleService {
             }
             articleVo.setAuthor(sysuser.getNickname());
         }
-        if(isBody){
+        if (isBody) {
 //            articleVo.
         }
-        if(isTags){
+        if (isTags) {
             Long articleId = article.getId();
             List<TagVo> tagVos = tagService.findTagsByArticleId(articleId);
 
@@ -56,6 +57,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     /**
      * 文章详情的articlvo转换
+     *
      * @param article
      * @param isAuthor
      * @param isBody
@@ -63,12 +65,12 @@ public class ArticleServiceImpl implements ArticleService {
      * @param isCategory
      * @return
      */
-    private ArticleVo copy(Article article, boolean isAuthor, boolean isBody, boolean isTags,boolean isCategory) {
+    private ArticleVo copy(Article article, boolean isAuthor, boolean isBody, boolean isTags, boolean isCategory) {
         ArticleVo articleVo = new ArticleVo();
-        BeanUtils.copyProperties(article,articleVo);
+        BeanUtils.copyProperties(article, articleVo);
         articleVo.setCreateDate(new DateTime(article.getCreateDate()).toString("yyyy-MM-dd:HH:mm"));
         //并不是所有的接口，都需要标签，作者信息
-        if(isAuthor){
+        if (isAuthor) {
             Long authorId = article.getAuthorId();
             SysUser sysuser = sysUserService.findUserById(authorId);
             if (sysuser == null) {
@@ -77,47 +79,50 @@ public class ArticleServiceImpl implements ArticleService {
             }
             articleVo.setAuthor(sysuser.getNickname());
         }
-        if(isBody){
+        if (isBody) {
             ArticleBodyVo articleBodyVo = findArticleBody(article.getId());
             articleVo.setBody(articleBodyVo);
         }
-        if(isTags){
+        if (isTags) {
             Long articleId = article.getId();
             List<TagVo> tagVos = tagService.findTagsByArticleId(articleId);
             articleVo.setTags(tagVos);
         }
-        if(isCategory){
+        if (isCategory) {
             CategoryVo categoryVo = findCategory(article.getCategoryId());
             articleVo.setCategory(categoryVo);
         }
         return articleVo;
     }
+
     @Autowired
     private CategoryService categoryService;
-    private CategoryVo findCategory(Long categoryId){
+
+    private CategoryVo findCategory(Long categoryId) {
         return categoryService.findCategoryById(categoryId);
     }
+
     @Autowired
     private ArticleBodyMapper articleBodyMapper;
+
     private ArticleBodyVo findArticleBody(Long articleId) {
         LambdaQueryWrapper<ArticleBody> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ArticleBody::getArticleId,articleId);
+        queryWrapper.eq(ArticleBody::getArticleId, articleId);
         ArticleBody articleBody = articleBodyMapper.selectOne(queryWrapper);
         ArticleBodyVo articleBodyVo = new ArticleBodyVo();
         articleBodyVo.setContent(articleBody.getContent());
         return articleBodyVo;
     }
 
-    private List<ArticleVo> copyList(List<Article> articleList,boolean isAuthor,
-                                     boolean isBody,boolean isTags){
+    private List<ArticleVo> copyList(List<Article> articleList, boolean isAuthor,
+                                     boolean isBody, boolean isTags) {
         ArrayList<ArticleVo> articleVoList = new ArrayList<>();
-        for(Article article:articleList){
+        for (Article article : articleList) {
             ArticleVo copy = copy(article, isAuthor, isBody, isTags);
             articleVoList.add(copy);
         }
         return articleVoList;
     }
-
 
 
     @Override
@@ -139,10 +144,10 @@ public class ArticleServiceImpl implements ArticleService {
 //        QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
         LambdaQueryWrapper<Article> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.orderByDesc(Article::getViewCounts);
-        lambdaQueryWrapper.select(Article::getId,Article::getTitle);
-        lambdaQueryWrapper.last("limit "+limit);
+        lambdaQueryWrapper.select(Article::getId, Article::getTitle);
+        lambdaQueryWrapper.last("limit " + limit);
         List<Article> articles = articleMapper.selectList(lambdaQueryWrapper);
-        return copyList(articles,false,false,false);
+        return copyList(articles, false, false, false);
 
     }
 
@@ -153,11 +158,11 @@ public class ArticleServiceImpl implements ArticleService {
 //        QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
         LambdaQueryWrapper<Article> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.orderByDesc(Article::getCreateDate);
-        lambdaQueryWrapper.select(Article::getId,Article::getTitle);
-        lambdaQueryWrapper.last("limit "+limit);
+        lambdaQueryWrapper.select(Article::getId, Article::getTitle);
+        lambdaQueryWrapper.last("limit " + limit);
         //select id,title from ms_article order by CreateDate desc limit 3;
         List<Article> articles = articleMapper.selectList(lambdaQueryWrapper);
-        return copyList(articles,false,false,false);
+        return copyList(articles, false, false, false);
     }
 
     @Override
@@ -167,8 +172,10 @@ public class ArticleServiceImpl implements ArticleService {
         List<Archives> archivesList = articleMapper.listArchives();
         return archivesList;
     }
+
     @Autowired
     private ThreadService threadService;
+
     @Override
     public Result findArticleById(Long articleId) {
         /**根据文章id获取文章信息
@@ -176,7 +183,10 @@ public class ArticleServiceImpl implements ArticleService {
          * 根据categoryid获取categroy获取标签数据
          */
         Article article = articleMapper.selectById(articleId);
-        threadService.updateViewConut(articleMapper,article);
+        //更新时会加写锁，阻塞其他的读操作，性能会比较低
+        //也会增加此处接口耗时
+        threadService.updateViewConut(articleMapper, article);
+
         ArticleVo articleVo = copy(article, true, true, true, true);
         return Result.success(articleVo);
 
