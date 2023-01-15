@@ -3,6 +3,7 @@ package com.yiming.blog.service;
 import com.yiming.blog.dao.dos.Archives;
 import com.yiming.blog.vo.ArticleVo;
 import com.yiming.blog.vo.Result;
+import com.yiming.blog.vo.params.ArticleParams;
 import com.yiming.blog.vo.params.PageParams;
 
 import java.util.List;
@@ -38,4 +39,11 @@ public interface ArticleService {
      * @return
      */
     Result findArticleById(Long articleId);
+
+    /**
+     * 发布新文章
+     * @param articleParams
+     * @return
+     */
+    Result publishArticles(ArticleParams articleParams);
 }

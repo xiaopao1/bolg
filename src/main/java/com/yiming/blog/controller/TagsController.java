@@ -16,6 +16,10 @@ import java.util.List;
 public class TagsController {
     @Autowired
     private TagService tagService;
+    @GetMapping
+    public Result getAllTags(){
+        return tagService.getAllTags();
+    }
     @GetMapping("hot")
     public Result listHotTags(){
         int limit = 6;

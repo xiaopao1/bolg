@@ -6,11 +6,15 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yiming.blog.dao.dos.Archives;
 import com.yiming.blog.dao.mapper.ArticleBodyMapper;
 import com.yiming.blog.dao.mapper.ArticleMapper;
+import com.yiming.blog.dao.mapper.ArticleTagMapper;
 import com.yiming.blog.dao.pojo.Article;
 import com.yiming.blog.dao.pojo.ArticleBody;
+import com.yiming.blog.dao.pojo.ArticleTag;
 import com.yiming.blog.dao.pojo.SysUser;
 import com.yiming.blog.service.*;
+import com.yiming.blog.utils.UserThreadLocal;
 import com.yiming.blog.vo.*;
+import com.yiming.blog.vo.params.ArticleParams;
 import com.yiming.blog.vo.params.PageParams;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
@@ -18,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -28,6 +33,8 @@ public class ArticleServiceImpl implements ArticleService {
     private TagService tagService;
     @Autowired
     private SysUserService sysUserService;
+    @Autowired
+    private ArticleTagMapper articleTagMapper;
 
     private ArticleVo copy(Article article, boolean isAuthor, boolean isBody, boolean isTags) {
         ArticleVo articleVo = new ArticleVo();
@@ -189,6 +196,55 @@ public class ArticleServiceImpl implements ArticleService {
 
         ArticleVo articleVo = copy(article, true, true, true, true);
         return Result.success(articleVo);
+
+    }
+
+    @Override
+    public Result publishArticles(ArticleParams articleParams) {
+        //构建Article对象
+        //作者id
+        //articelBody表
+        //联合表tag_article处理
+        SysUser user = UserThreadLocal.get();
+        Article article = new Article();
+        article.setAuthorId(user.getId());
+        article.setViewCounts(0);
+        article.setCommentCounts(0);
+        article.setWeight(Article.Article_Common);
+        article.setCreateDate(System.currentTimeMillis());
+        article.setTitle(articleParams.getTitle());
+        article.setSummary(articleParams.getSummary());
+        article.setBodyId(-1L);
+        article.setCategoryId(articleParams.getCategory().getId());
+        articleMapper.insert(article);
+
+        Long articleId = article.getId();
+        //artice_tags
+        List<TagVo> tags = articleParams.getTags();
+        if (tags!= null && tags.size() > 0) {
+            for (TagVo tagVo : tags) {
+                ArticleTag tag = new ArticleTag();
+                tag.setArticleId(articleId);
+                tag.setTagId(tagVo.getId());
+                this.articleTagMapper.insert(tag);
+            }
+        }
+        //ArticleBody
+        ArticleBody articleBody = new ArticleBody();
+        articleBody.setArticleId(articleId);
+        articleBody.setContent(articleParams.getBody().getContent());
+        articleBody.setContentHtml(articleParams.getBody().getContentHtml());
+        articleBodyMapper.insert(articleBody);
+
+        article.setBodyId(articleBody.getId());
+        articleMapper.updateById(article);
+
+        ArticleVo articleVo = new ArticleVo();
+        articleVo.setId(article.getId());
+        HashMap<String,String> hashMap = new HashMap();
+        hashMap.put("id",article.getId().toString());
+        return Result.success(hashMap);
+
 
     }
 }

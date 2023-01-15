@@ -3,6 +3,7 @@ package com.yiming.blog.service.impl;
 import com.yiming.blog.dao.mapper.TagMapper;
 import com.yiming.blog.dao.pojo.Tag;
 import com.yiming.blog.service.TagService;
+import com.yiming.blog.vo.Result;
 import com.yiming.blog.vo.TagVo;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,13 @@ public class TagServiceImpl implements TagService {
         List<Tag> tags=tagMapper.findTagsByHotTagIds(hotTagIds);
 
         return copyList(tags);
+    }
+
+    @Override
+    public Result getAllTags() {
+        List<Tag> tags = this.tagMapper.selectList(null);
+        List<TagVo> tagVos = copyList(tags);
+        return Result.success(tagVos);
     }
 
     private List<TagVo> copyList(List<Tag> tags) {

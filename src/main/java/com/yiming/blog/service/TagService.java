@@ -1,5 +1,6 @@
 package com.yiming.blog.service;
 
+import com.yiming.blog.vo.Result;
 import com.yiming.blog.vo.TagVo;
 
 import java.util.List;
@@ -18,4 +19,10 @@ public interface TagService {
      * @return
      */
     List<TagVo> hot(int limit);
+
+    /**
+     * 获取所有标签
+     * @return
+     */
+    Result getAllTags();
 }

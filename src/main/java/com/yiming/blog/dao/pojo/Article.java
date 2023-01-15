@@ -32,13 +32,10 @@ public class Article {
      *类别id
      */
     private Long categoryId;
-
     /**
      * 置顶
      */
     private Integer weight;
-
-
     /**
      * 创建时间
      */

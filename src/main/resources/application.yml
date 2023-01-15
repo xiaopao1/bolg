@@ -36,3 +36,6 @@ mybatis-plus:
   global-config:
     db-config:
       table-prefix: ms_
+qiniu:
+  accessKey: OGcIBQvI2jmovxdt5mEFQn3QQWmuL_LC1uVh3XSL
+  secretKey: jyG3-wMrI4rsZFhe0MBXhPC2Xj-ClgUGHOoqwiMm

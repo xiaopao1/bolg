@@ -1,6 +1,6 @@
 package com.yiming.blog.controller;
 
-import com.yiming.blog.service.BlogService;
+import com.yiming.blog.service.CategoryService;
 import com.yiming.blog.vo.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("categorys")
-public class BlogController {
+public class CategoryController {
     @Autowired
-    private BlogService blogService;
+    private CategoryService categoryService;
 
-    @GetMapping("list")
+    @GetMapping()
     public Result getCategorys() {
-        return blogService.getCategory();
+        return categoryService.getCategorys();
     }
 }
